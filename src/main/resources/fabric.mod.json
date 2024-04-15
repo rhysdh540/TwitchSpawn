@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "twitchspawn",
+  "version": "${version}",
+
+  "name": "TwitchSpawn",
+  "description": "TwitchSpawn listens for live events related to your Twitch channel using various Socket APIs.\nThen it handles those events with the rules handcrafted by you!",
+  "authors": ["iGoodie", "BONNe", "rdh"],
+  "contact": {},
+
+  "license": "EPL-1.0",
+  "icon": "icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [ "net.programmer.igoodie.twitchspawn.TwitchSpawn" ],
+    "client": [ "net.programmer.igoodie.twitchspawn.TwitchSpawn$Client" ],
+    "server": [ "net.programmer.igoodie.twitchspawn.TwitchSpawn$Server" ]
+  },
+  "mixins": [
+    "twitchspawn.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.3",
+    "minecraft": ">=1.20.2"
+  }
+}

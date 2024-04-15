@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.programmer.igoodie.twitchspawn.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MixinGui",
+    "MixinLoadingOverlay"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }, "mixins": ["MixinPlayerList"]
+}
