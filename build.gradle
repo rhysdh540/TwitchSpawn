@@ -1,6 +1,5 @@
 plugins {
     id 'fabric-loom' version '1.5-SNAPSHOT'
-    id 'maven-publish'
 }
 
 version = project.mod_version
@@ -18,27 +17,32 @@ repositories {
 
 dependencies {
     // To change the versions see the gradle.properties file
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-    include(implementation("com.squareup.okhttp3:okhttp:${rootProject.okhttp_version}"))
-    include(implementation("io.socket:socket.io-client:${rootProject.socket_io_version}"))
-    include(modImplementation("io.github.fabricators_of_create.Porting-Lib:networking:2.3.2+1.20.1")) {
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    include(implementation("com.squareup.okhttp3:okhttp:${okhttp_version}"))
+    include(implementation("io.socket:socket.io-client:${socket_io_version}"))
+    include(modImplementation("io.github.fabricators_of_create.Porting-Lib:networking:${porting_lib_version}")) {
         exclude group: "io.github.fabricators_of_create.Porting-Lib", module: "core"
     }
+
+    include(implementation("com.electronwill.night-config:core:${night_config_version}"))
+    include(implementation("com.electronwill.night-config:toml:${night_config_version}"))
 }
 
 processResources {
-    inputs.property "version", project.version
-    inputs.property "minecraft_version", project.minecraft_version
-    inputs.property "loader_version", project.fabric_loader_version
+    def props = [
+            version: version,
+            minecraft_version: minecraft_version,
+            loader_version: fabric_loader_version
+    ]
+    inputs.properties props
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version,
-                "minecraft_version": project.minecraft_version,
-                "loader_version": project.fabric_loader_version
+        expand props +
+                ['Client': '$Client', 'Server': '$Server'] // stop gradle from trying to expand inner class entrypoints
     }
 }
 
@@ -59,31 +63,83 @@ java {
     if (JavaVersion.current() < javaVersion) {
         toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
     }
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
     withSourcesJar()
 }
 
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}"}
+// i am so sorry
+
+import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
+import java.util.jar.JarInputStream
+import java.util.jar.JarEntry
+import com.google.gson.JsonParser
+
+remapJar {
+    doLast {
+        def jarFile = archiveFile.get().asFile
+        def entries = new LinkedHashMap<String, byte[]>()
+        def jar = new JarFile(jarFile)
+        jar.stream().forEach { entry ->
+            if(!entry.isDirectory()) {
+                entries[entry.name] = jar.getInputStream(entry).bytes
+            }
+        }
+
+        jar.close()
+        jarFile.delete()
+
+        entries.replaceAll { k, v ->
+            if(k == "META-INF/jars/networking-${porting_lib_version}.jar") {
+                v = processNetworkingJar(v)
+            }
+            return v
+        }
+
+        JarOutputStream jos = new JarOutputStream(new FileOutputStream(jarFile))
+        jos.setLevel(9)
+        entries.each { k, v ->
+            jos.putNextEntry(new JarEntry(k))
+            jos.write(v)
+            jos.closeEntry()
+        }
+        jos.finish()
+        jos.close()
     }
 }
 
-// configure the maven publication
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
+byte[] processNetworkingJar(byte[] bytes) {
+    def is = new JarInputStream(new ByteArrayInputStream(bytes))
+    def entries = new LinkedHashMap<String, byte[]>()
+
+    while(true) {
+        def entry = is.getNextJarEntry()
+        if(entry == null) break
+        if(entry.isDirectory()) continue
+        entries[entry.name] = is.readAllBytes()
     }
 
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
+    //remove nested porting_lib_core jar
+    //open fabric.mod.json and remove "jars" entry
+
+    entries.removeAll { it.key == "META-INF/jars/porting_lib_core-${porting_lib_version}.jar" }
+    entries.replaceAll((k, v) -> {
+        if (!k.endsWith(".json")) {
+            return v
+        }
+        def json = JsonParser.parseString(new String(v)).getAsJsonObject()
+        if(k == "fabric.mod.json") {
+            json.remove("jars")
+        }
+        return json.toString().getBytes()
+    })
+
+    def bos = new ByteArrayOutputStream()
+    JarOutputStream jos = new JarOutputStream(bos)
+    entries.each { k, v ->
+        jos.putNextEntry(new JarEntry(k))
+        jos.write(v)
+        jos.closeEntry()
     }
+    jos.close()
+    return bos.toByteArray()
 }
