@@ -27,10 +27,6 @@ dependencies {
     include(modImplementation("io.github.fabricators_of_create.Porting-Lib:networking:2.3.2+1.20.1")) {
         exclude group: "io.github.fabricators_of_create.Porting-Lib", module: "core"
     }
-
-    // TODO remove when all uses are replaced with fapi
-    modImplementation("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
-    modImplementation("dev.architectury:architectury-injectables:1.0.13") // dont use, this is here to make arch's expectplatforms work
 }
 
 processResources {
