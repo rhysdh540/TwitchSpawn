@@ -130,15 +130,14 @@ def processNetworkingJar(byte[] bytes) {
 
     entries.removeAll { it.key == "META-INF/jars/porting_lib_core-${porting_lib_version}.jar" }
     entries.replaceAll((k, v) -> {
-        if (!k.endsWith(".json")) {
+
+        if (!(k == "fabric.mod.json")) {
             return v
         }
         def json = JsonParser.parseString(new String(v)).getAsJsonObject()
-        if(k == "fabric.mod.json") {
             json.remove("jars")
             json.get("depends").getAsJsonObject().add("minecraft", new JsonPrimitive(minecraft_version))
-        }
-        return json.toString().getBytes()
+            return json.toString().getBytes()
     })
 
     if(!entries.containsKey("META-INF/MANIFEST.MF")) {
