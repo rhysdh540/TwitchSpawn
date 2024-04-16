@@ -9,6 +9,10 @@ base {
     archivesName = project.archives_base_name
 }
 
+configurations {
+    shade
+}
+
 repositories {
     mavenCentral()
     maven { url "https://maven.architectury.dev" }
@@ -68,6 +72,9 @@ java {
 
 // i am so sorry
 
+
+import com.google.gson.JsonPrimitive
+
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.jar.JarInputStream
@@ -107,7 +114,7 @@ remapJar {
     }
 }
 
-byte[] processNetworkingJar(byte[] bytes) {
+def processNetworkingJar(byte[] bytes) {
     def is = new JarInputStream(new ByteArrayInputStream(bytes))
     def entries = new LinkedHashMap<String, byte[]>()
 
@@ -129,9 +136,14 @@ byte[] processNetworkingJar(byte[] bytes) {
         def json = JsonParser.parseString(new String(v)).getAsJsonObject()
         if(k == "fabric.mod.json") {
             json.remove("jars")
+            json.get("depends").getAsJsonObject().add("minecraft", new JsonPrimitive(minecraft_version))
         }
         return json.toString().getBytes()
     })
+
+    if(!entries.containsKey("META-INF/MANIFEST.MF")) {
+        entries.put("META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n".getBytes())
+    }
 
     def bos = new ByteArrayOutputStream()
     JarOutputStream jos = new JarOutputStream(bos)

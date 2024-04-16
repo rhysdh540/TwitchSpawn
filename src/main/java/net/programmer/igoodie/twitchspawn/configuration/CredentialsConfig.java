@@ -53,7 +53,8 @@ public class CredentialsConfig {
 			CredentialsConfig credentials = new CredentialsConfig();
 			credentials.moderatorsMinecraft = parsedConfig.get("moderatorsMinecraft");
 			credentials.moderatorsTwitch = parsedConfig.get("moderatorsTwitch");
-			credentials.streamers = (List<Streamer>) ((List) parsedConfig.get("streamers")).stream()
+			//noinspection unchecked
+			credentials.streamers = ((List<Streamer>) parsedConfig.get("streamers")).stream()
 					.map(config -> toStreamer(converter, (Config) config))
 					.collect(Collectors.toList());
 
@@ -107,7 +108,7 @@ public class CredentialsConfig {
 		}
 
 		// No element left, correct it to default
-		if(list.size() == 0) {
+		if(list.isEmpty()) {
 			TwitchSpawn.LOGGER.info("Correcting {}: Replacing field with default value {}", path, defaultList);
 			config.set(path, defaultList);
 			corrected = true;
@@ -164,7 +165,7 @@ public class CredentialsConfig {
 		}
 
 		// No element left, correct it to default
-		if(streamers.size() == 0) {
+		if(streamers.isEmpty()) {
 			TwitchSpawn.LOGGER.info("Correcting {}: Replacing field with default value {}", path, defaultList);
 			List<Config> streamerConfig = defaultList.stream()
 					.map(streamer -> toConfig(converter, streamer))
