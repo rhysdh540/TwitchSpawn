@@ -13,18 +13,18 @@ import net.minecraft.resources.ResourceLocation;
 public class TwitchSpawnArgumentTypes {
 	public static void registerArgumentTypes() {
 		ArgumentTypeRegistry.registerArgumentType(
-				new ResourceLocation(TwitchSpawn.MOD_ID, "ruleset"),
+				new ResourceLocation(TwitchSpawn.ID, "ruleset"),
 				RulesetNameArgumentType.class,
 				SingletonArgumentInfo.contextFree(RulesetNameArgumentType::rulesetName));
 
 		//TODO investigate why this is flagged as unreachable code
 		ArgumentTypeRegistry.registerArgumentType(
-				new ResourceLocation(TwitchSpawn.MOD_ID, "streamer"),
+				new ResourceLocation(TwitchSpawn.ID, "streamer"),
 				StreamerArgumentType.class,
 				SingletonArgumentInfo.contextFree(StreamerArgumentType::streamerNick));
 
 		ArgumentTypeRegistry.registerArgumentType(
-				new ResourceLocation(TwitchSpawn.MOD_ID, "tslwords"),
+				new ResourceLocation(TwitchSpawn.ID, "tslwords"),
 				TSLWordsArgumentType.class,
 				SingletonArgumentInfo.contextFree(TSLWordsArgumentType::tslWords));
 	}

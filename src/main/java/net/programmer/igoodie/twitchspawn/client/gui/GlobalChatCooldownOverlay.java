@@ -16,17 +16,20 @@ import net.minecraft.resources.ResourceLocation;
 public class GlobalChatCooldownOverlay {
 
 	private static final ResourceLocation cooldownGlyphs =
-			new ResourceLocation(TwitchSpawn.MOD_ID, "textures/cooldown.png");
+			new ResourceLocation(TwitchSpawn.ID, "textures/cooldown.png");
 
 	private static long timestamp = -1;
+
+	private static boolean enabled = true;
 
 	private static boolean drew = false;
 
 	/**
 	 * Render indicator
 	 */
-	private static final TwitchSpawnClientGuiEvent.OverlayRenderPre PRE_RENDER =
-			(graphics, resourceLocation) -> drew = false;
+	private static final TwitchSpawnClientGuiEvent.OverlayRenderPre PRE_RENDER = (graphics, resourceLocation) -> {
+		if(enabled) drew = false;
+	};
 
 	/**
 	 * Render the gui
@@ -39,8 +42,11 @@ public class GlobalChatCooldownOverlay {
 	 * Register rendering events.
 	 */
 	public static void register() {
-		TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.register(PRE_RENDER);
-		TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.register(POST_RENDER);
+		if(enabled) {
+			TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.register(PRE_RENDER);
+			TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.register(POST_RENDER);
+		}
+		enabled = true;
 	}
 
 
@@ -48,8 +54,9 @@ public class GlobalChatCooldownOverlay {
 	 * Unregister rendering events.
 	 */
 	public static void unregister() {
-		TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.unregister(PRE_RENDER);
-		TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.unregister(POST_RENDER);
+//		TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.unregister(PRE_RENDER);
+//		TwitchSpawnClientGuiEvent.OVERLAY_RENDER_POST.unregister(POST_RENDER);
+		enabled = false;
 	}
 
 
@@ -59,6 +66,7 @@ public class GlobalChatCooldownOverlay {
 
 
 	private static void onRenderGuiPost(GuiGraphics graphics, ResourceLocation resourceLocation) {
+		if(!enabled) return;
 		if(!resourceLocation.equals(ResourceLocation.of("hotbar", ':')))
 			return; // Render only on HOTBAR
 

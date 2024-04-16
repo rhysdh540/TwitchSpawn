@@ -11,7 +11,9 @@ base {
 }
 
 repositories {
-    maven { url 'https://maven.architectury.dev' }
+    mavenCentral()
+    maven { url "https://maven.architectury.dev" }
+    maven { url "https://mvn.devos.one/snapshots/" }
 }
 
 dependencies {
@@ -22,6 +24,9 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
     include(implementation("com.squareup.okhttp3:okhttp:${rootProject.okhttp_version}"))
     include(implementation("io.socket:socket.io-client:${rootProject.socket_io_version}"))
+    include(modImplementation("io.github.fabricators_of_create.Porting-Lib:networking:2.3.2+1.20.1")) {
+        exclude group: "io.github.fabricators_of_create.Porting-Lib", module: "core"
+    }
 
     // TODO remove when all uses are replaced with fapi
     modImplementation("dev.architectury:architectury-fabric:${rootProject.architectury_version}")

@@ -29,34 +29,24 @@ import org.apache.logging.log4j.Logger;
 
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 
 
 public class TwitchSpawn implements ModInitializer {
-	/**
-	 * The plugin mod-id
-	 */
-	public static final String MOD_ID = "twitchspawn";
+	public static final String ID = "twitchspawn";
 
-	/**
-	 * Minecraft server instance.
-	 */
 	public static MinecraftServer SERVER;
 
-	/**
-	 * Trace manager.
-	 */
 	public static TraceManager TRACE_MANAGER;
 
-	/**
-	 * Logger.
-	 */
 	public static final Logger LOGGER = LogManager.getLogger();
 
+	public static ResourceLocation asResource(String loc) {
+		return new ResourceLocation(ID, loc);
+	}
 
-	/**
-	 * The main init class.
-	 */
+
 	public void onInitialize() {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registry, env) ->
 				TwitchSpawnCommand.register(dispatcher)
@@ -99,7 +89,7 @@ public class TwitchSpawn implements ModInitializer {
 				TRACE_MANAGER.connectStreamer(player.getName().getString());
 			}
 
-			NetworkManager.CHANNEL.sendToPlayer(player, new StatusChangedPacket(TRACE_MANAGER.isRunning()));
+			NetworkManager.CHANNEL.sendToClient(new StatusChangedPacket(TRACE_MANAGER.isRunning()), player);
 		});
 
 		// Do stuff on player leaving the server.
@@ -110,7 +100,7 @@ public class TwitchSpawn implements ModInitializer {
 		});
 
 		try {
-			TwitchSpawnSoundEvent.REGISTRY.register();
+			TwitchSpawnSoundEvent.register();
 			TwitchSpawnArgumentTypes.registerArgumentTypes();
 
 			NetworkManager.initialize();

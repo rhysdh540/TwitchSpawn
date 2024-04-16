@@ -1,17 +1,16 @@
 package net.programmer.igoodie.twitchspawn.configuration;
 
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.TwitchSpawnLoadingErrors;
 import net.programmer.igoodie.twitchspawn.tslanguage.TSLRulesetCollection;
-
-import dev.architectury.platform.Platform;
 
 import java.io.File;
 
 public class ConfigManager {
 
-	public static final String CONFIG_DIR_PATH = Platform.getConfigFolder().toString() + File.separator + "TwitchSpawn";
+	public static final String CONFIG_DIR_PATH = FabricLoader.getInstance().getConfigDir().resolve("TwitchSpawn").toString();
 
 	public static CredentialsConfig CREDENTIALS;
 

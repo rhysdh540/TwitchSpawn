@@ -4,9 +4,9 @@ public class TSHelper {
 
 	public static boolean truthy(Object object) {
 		if(object == null) return false;
-		if((object instanceof String) && ((String) object).isEmpty()) return false;
-		if((object instanceof Number) && ((Number) object).doubleValue() == 0.0) return false;
-		return (!(object instanceof Boolean)) || ((Boolean) object);
+		if((object instanceof String s) && s.isEmpty()) return false;
+		if((object instanceof Number n) && n.doubleValue() == 0.0) return false;
+		return !(object instanceof Boolean b) || b;
 	}
 
 	public static String jslikeOr(String... values) {

@@ -19,17 +19,20 @@ import net.minecraft.sounds.SoundEvent;
 public class StatusIndicatorOverlay {
 
 	private static final ResourceLocation indicatorIcons =
-			new ResourceLocation(TwitchSpawn.MOD_ID, "textures/indicators.png");
+			new ResourceLocation(TwitchSpawn.ID, "textures/indicators.png");
 
 	private static boolean running = false;
+
+	private static boolean enabled = true;
 
 	private static boolean drew = false;
 
 	/**
 	 * Render indicator
 	 */
-	private static final TwitchSpawnClientGuiEvent.OverlayRenderPre PRE_RENDER =
-			(graphics, resourceLocation) -> drew = false;
+	private static final TwitchSpawnClientGuiEvent.OverlayRenderPre PRE_RENDER = (graphics, resourceLocation) -> {
+		if(enabled) drew = false;
+	};
 
 	/**
 	 * Render the gui
@@ -42,8 +45,11 @@ public class StatusIndicatorOverlay {
 	 * Register rendering events.
 	 */
 	public static void register() {
-		TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.register(PRE_RENDER);
-		TwitchSpawnClientGuiEvent.DEBUG_TEXT.register(POST_RENDER);
+		if(enabled) {
+			TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.register(PRE_RENDER);
+			TwitchSpawnClientGuiEvent.DEBUG_TEXT.register(POST_RENDER);
+		}
+		enabled = true;
 	}
 
 
@@ -51,8 +57,9 @@ public class StatusIndicatorOverlay {
 	 * Unregister rendering events.
 	 */
 	public static void unregister() {
-		TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.unregister(PRE_RENDER);
-		TwitchSpawnClientGuiEvent.DEBUG_TEXT.unregister(POST_RENDER);
+//		TwitchSpawnClientGuiEvent.OVERLAY_RENDER_PRE.unregister(PRE_RENDER);
+//		TwitchSpawnClientGuiEvent.DEBUG_TEXT.unregister(POST_RENDER);
+		enabled = false;
 	}
 
 
@@ -60,7 +67,7 @@ public class StatusIndicatorOverlay {
 		StatusIndicatorOverlay.running = running;
 
 		ResourceLocation soundEvent = running ?
-				TwitchSpawnSoundEvent.POP_IN.getId() : TwitchSpawnSoundEvent.POP_OUT.getId();
+				TwitchSpawnSoundEvent.POP_IN.getLocation() : TwitchSpawnSoundEvent.POP_OUT.getLocation();
 
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer self = minecraft.player;
@@ -72,6 +79,7 @@ public class StatusIndicatorOverlay {
 
 
 	private static void onRenderGuiPost(GuiGraphics gui) {
+		if(!enabled) return;
 		if(ConfigManager.PREFERENCES.indicatorDisplay == PreferencesConfig.IndicatorDisplay.DISABLED)
 			return; // The display is disabled, stop here
 

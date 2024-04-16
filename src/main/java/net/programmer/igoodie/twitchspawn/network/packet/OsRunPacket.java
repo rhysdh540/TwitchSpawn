@@ -1,46 +1,34 @@
 package net.programmer.igoodie.twitchspawn.network.packet;
 
-
+import net.programmer.igoodie.twitchspawn.network.SimplePacketBase;
 import net.programmer.igoodie.twitchspawn.tslanguage.action.OsRunAction;
-
-import dev.architectury.networking.NetworkManager;
 
 import net.minecraft.network.FriendlyByteBuf;
 
-import java.util.function.Supplier;
+public class OsRunPacket extends SimplePacketBase {
+	private final OsRunAction.Shell shell;
+	private final String script;
 
-
-public class OsRunPacket {
+	public OsRunPacket(FriendlyByteBuf buf) {
+		this.shell = OsRunAction.Shell.values()[buf.readInt()];
+		this.script = buf.readUtf();
+	}
 
 	public OsRunPacket(OsRunAction.Shell shell, String script) {
 		this.shell = shell;
 		this.script = script;
 	}
 
-	public static void encode(OsRunPacket packet, FriendlyByteBuf buffer) {
-		buffer.writeInt(packet.shell.ordinal());
-		buffer.writeUtf(packet.script);
+
+	@Override
+	public void write(FriendlyByteBuf buffer) {
+		buffer.writeInt(this.shell.ordinal());
+		buffer.writeUtf(this.script);
 	}
 
-	public static OsRunPacket decode(FriendlyByteBuf buffer) {
-		OsRunAction.Shell shell = OsRunAction.Shell.values()[buffer.readInt()];
-		String script = buffer.readUtf();
-
-		return new OsRunPacket(shell, script);
+	@Override
+	public boolean handle(Context context) {
+		context.enqueueWork(() -> OsRunAction.handleLocalScript(shell, script));
+		return true;
 	}
-
-	public void handle(Supplier<NetworkManager.PacketContext> context) {
-		context.get().queue(() -> OsRunAction.handleLocalScript(this.shell, this.script));
-	}
-
-
-	/**
-	 * Shell to run the script with.
-	 */
-	private final OsRunAction.Shell shell;
-
-	/**
-	 * Script to run.
-	 */
-	private final String script;
 }

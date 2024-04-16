@@ -1,8 +1,9 @@
 package net.programmer.igoodie.twitchspawn.util;
 
+import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 public class CooldownBucket {
 
@@ -10,14 +11,14 @@ public class CooldownBucket {
 	public int cooldownMillis;
 
 	public long globalCooldownUntil;
-	public Map<String, Long> individualCooldownUntil;
+	public Object2LongMap<String> individualCooldownUntil;
 
 	public CooldownBucket(int globalCooldown, int individualCooldown) {
 		this.cooldownMillis = individualCooldown;
 		this.globalCooldownMillis = globalCooldown;
 
 		this.globalCooldownUntil = now();
-		this.individualCooldownUntil = new HashMap<>();
+		this.individualCooldownUntil = new Object2LongLinkedOpenHashMap<>();
 	}
 
 	public float getGlobalCooldown() {
@@ -36,13 +37,11 @@ public class CooldownBucket {
 	}
 
 	public boolean hasCooldown(String nickname) {
-		long now = now();
-		Long nextAvailableTime = individualCooldownUntil.get(nickname);
-		return nextAvailableTime != null && now <= nextAvailableTime;
+		return now() <= individualCooldownUntil.getLong(nickname);
 	}
 
 	public long getCooldown(String nickname) {
-		return individualCooldownUntil.get(nickname) - now();
+		return individualCooldownUntil.getLong(nickname) - now();
 	}
 
 	public boolean canConsume(String nickname) {
@@ -58,5 +57,4 @@ public class CooldownBucket {
 	public static long now() {
 		return Instant.now().getEpochSecond() * 1000;
 	}
-
 }

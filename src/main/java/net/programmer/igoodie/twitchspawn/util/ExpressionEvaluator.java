@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 public class ExpressionEvaluator {
 
-	public static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{(.*?)\\}");
+	public static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{(.*?)}");
 
 	public static String replaceExpressions(String input, Function<String, String> evaluator) {
 		Matcher matcher = EXPRESSION_PATTERN.matcher(input);
@@ -39,23 +39,26 @@ public class ExpressionEvaluator {
 	}
 
 	public static String fromArgs(String expression, EventArguments args) {
-		if(expression.equals("event"))
-			return args.eventName;
-
-		if(expression.equals("message"))
-			return JSONUtils.escape(args.message);
-
-		if(expression.equals("message_unescaped"))
-			return args.message;
-
-		if(expression.equals("title"))
-			return args.rewardTitle;
-
-		if(expression.equals("actor"))
-			return args.actorNickname;
-
-		if(expression.equals("streamer"))
-			return args.streamerNickname;
+		switch(expression) {
+			case "event" -> {
+				return args.eventName;
+			}
+			case "message" -> {
+				return JSONUtils.escape(args.message);
+			}
+			case "message_unescaped" -> {
+				return args.message;
+			}
+			case "title" -> {
+				return args.rewardTitle;
+			}
+			case "actor" -> {
+				return args.actorNickname;
+			}
+			case "streamer" -> {
+				return args.streamerNickname;
+			}
+		}
 
 		if(expression.equals("amount") && args.donationAmount != 0.0)
 			return String.valueOf(args.donationAmount);
@@ -84,22 +87,14 @@ public class ExpressionEvaluator {
 		if(expression.equals("raiders") && args.raiderCount != 0)
 			return String.valueOf(args.raiderCount);
 
-		if(expression.equals("date"))
-			return getDateFormat("dd-MM-yyyy", TimeZone.getDefault()).format(new Date());
-
-		if(expression.equals("date_utc"))
-			return getDateFormat("dd-MM-yyyy", TimeZone.getTimeZone("UTC")).format(new Date());
-
-		if(expression.equals("time"))
-			return getDateFormat("HH:mm:ss", TimeZone.getDefault()).format(new Date());
-
-		if(expression.equals("time_utc"))
-			return getDateFormat("HH:mm:ss", TimeZone.getTimeZone("UTC")).format(new Date());
-
-		if(expression.equals("unix"))
-			return String.valueOf(Instant.now().getEpochSecond());
-
-		return null;
+		return switch(expression) {
+			case "date" -> getDateFormat("dd-MM-yyyy", TimeZone.getDefault()).format(new Date());
+			case "date_utc" -> getDateFormat("dd-MM-yyyy", TimeZone.getTimeZone("UTC")).format(new Date());
+			case "time" -> getDateFormat("HH:mm:ss", TimeZone.getDefault()).format(new Date());
+			case "time_utc" -> getDateFormat("HH:mm:ss", TimeZone.getTimeZone("UTC")).format(new Date());
+			case "unix" -> String.valueOf(Instant.now().getEpochSecond());
+			default -> null;
+		};
 	}
 
 	private static DateFormat getDateFormat(String format, TimeZone timezone) {

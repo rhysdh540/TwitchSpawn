@@ -1,11 +1,13 @@
 {
   "pop_in": {
+    "subtitle": "Pop In",
     "category": "master",
     "sounds": [
       "twitchspawn:pop_in"
     ]
   },
   "pop_out": {
+    "subtitle": "Pop Out",
     "category": "master",
     "sounds": [
       "twitchspawn:pop_out"

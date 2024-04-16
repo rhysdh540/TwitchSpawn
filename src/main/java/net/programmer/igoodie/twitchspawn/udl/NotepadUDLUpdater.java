@@ -25,7 +25,7 @@ public class NotepadUDLUpdater {
 	));
 
 	private static final Pattern USERLANG_MATCHER = Pattern.compile(
-			"<UserLang (?<attributes>.*?)>.*?<\\/UserLang>",
+			"<UserLang (?<attributes>.*?)>.*?</UserLang>",
 			Pattern.DOTALL | Pattern.MULTILINE
 	);
 

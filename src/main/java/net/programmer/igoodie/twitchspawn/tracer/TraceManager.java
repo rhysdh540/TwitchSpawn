@@ -80,7 +80,7 @@ public class TraceManager {
 		for(ServerPlayer player : TwitchSpawn.SERVER.getPlayerList().getPlayers()) {
 			Component successText = Component.translatable("commands.twitchspawn.start.success");
 			player.sendSystemMessage(successText);
-			NetworkManager.CHANNEL.sendToPlayer(player, new StatusChangedPacket(true));
+			NetworkManager.CHANNEL.sendToClient(new StatusChangedPacket(true), player);
 		}
 	}
 
@@ -106,7 +106,7 @@ public class TraceManager {
 				Component successText = Component.translatable("commands.twitchspawn.stop.success",
 						source == null ? "Server" : source.getTextName(), reason);
 				player.sendSystemMessage(successText);
-				NetworkManager.CHANNEL.sendToPlayer(player, new StatusChangedPacket(false));
+				NetworkManager.CHANNEL.sendToClient(new StatusChangedPacket(false), player);
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package net.programmer.igoodie.twitchspawn.tslanguage.action;
 
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.programmer.igoodie.twitchspawn.TwitchSpawn;
 import net.programmer.igoodie.twitchspawn.network.NetworkManager;
 import net.programmer.igoodie.twitchspawn.network.packet.OsRunPacket;
@@ -13,7 +14,6 @@ import net.minecraft.server.level.ServerPlayer;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 public class OsRunAction extends TSLAction {
@@ -75,14 +75,14 @@ public class OsRunAction extends TSLAction {
 		POWERSHELL("powershell", "/c"),
 		BASH();
 
-		public List<String> processPrefix;
+		public final List<String> processPrefix;
 
 		Shell(String... processPrefix) {
 			this.processPrefix = Arrays.asList(processPrefix);
 		}
 
 		public List<String> createProcessScript(String script) {
-			List<String> processScript = new LinkedList<>(this.processPrefix);
+			List<String> processScript = new ObjectArrayList<>(this.processPrefix);
 
 			String commandName = commandName(script);
 
@@ -177,8 +177,8 @@ public class OsRunAction extends TSLAction {
 			handleLocalScript(shell, replaceExpressions(shellScript, args));
 
 		} else if(scriptLocation == ScriptLocation.REMOTE) {
-			NetworkManager.CHANNEL.sendToPlayer(player,
-					new OsRunPacket(shell, replaceExpressions(shellScript, args)));
+			NetworkManager.CHANNEL
+					.sendToClient(new OsRunPacket(shell, replaceExpressions(shellScript, args)), player);
 		}
 	}
 
